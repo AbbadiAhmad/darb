@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: darb-postgres
+    environment:
+      POSTGRES_DB: darb
+      POSTGRES_USER: darb_user
+      POSTGRES_PASSWORD: darb_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    networks:
+      - darb-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U darb_user -d darb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: darb-backend
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: darb
+      DB_USER: darb_user
+      DB_PASSWORD: darb_password
+      JWT_SECRET: ${JWT_SECRET:-change_this_in_production}
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - darb-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  darb-network:
+    driver: bridge

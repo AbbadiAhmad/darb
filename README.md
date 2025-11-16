@@ -4,11 +4,54 @@ A comprehensive web-based platform combining BPMN workflow automation with integ
 
 ## Overview
 
-DARB (Dynamic Automated Resource & Business workflow) is a process-driven ticketing application that unifies:
+DARB (Dynamic Automated Resource & Business workflow) is composed of **three interconnected applications** that work together:
+
+### The Three Applications
+
+1. **Process Designer** (Backend Office)
+   - Visual BPMN process modeling
+   - Form builder and task configuration
+   - Process publishing and versioning
+   - Users: Process designers, administrators
+
+2. **Ticketing/Execution Engine** (Process Management)
+   - Process execution following BPMN XML
+   - Task assignment and routing
+   - Work item (ticket) management
+   - State machine and workflow orchestration
+   - Users: Agents, approvers, managers
+
+3. **Public Portal** (Citizen Interface)
+   - Dynamic form rendering from XML
+   - Service catalog and application submission
+   - Application tracking and status
+   - Users: Citizens, customers, end-users
+
+### How They Work Together
+
+```
+Designer creates XML → Engine executes XML → Portal renders forms from XML
+```
+
+**Example Flow** (Passport Application):
+1. **Designer** creates "Passport Process" with application form fields in XML
+2. **Citizen** visits public portal, selects passport service
+3. **Portal** fetches XML, renders dynamic form (name, ID, photo fields)
+4. **Citizen** fills and submits form
+5. **Engine** receives data, creates process instance, assigns task to officer
+6. **Officer** reviews via ticketing system, approves
+7. **Engine** follows XML flow to next step (issuance)
+8. **Citizen** tracks status via portal
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture and data flow.
+
+### Core Features
 
 - **Visual Process Modeling** - BPMN 2.0-based workflow design
+- **Dynamic Form Generation** - Forms generated from XML definitions
 - **Native Ticketing Integration** - Work items as first-class citizens
 - **Compliance by Design** - Immutable audit trails and standards mapping
+- **Flexible Authentication** - Shared or independent login per application
 - **Role-Based Access Control** - Fine-grained permissions for process governance
 - **Process Execution Engine** - Task management and workflow automation
 

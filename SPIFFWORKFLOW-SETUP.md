@@ -1,12 +1,13 @@
 # SpiffWorkflow Docker Setup
 
-This docker-compose configuration runs a complete SpiffWorkflow environment for development and testing.
+This docker-compose configuration is the **official** SpiffWorkflow setup from the [spiff-arena repository](https://github.com/sartography/spiff-arena).
 
 ## Services Included
 
 - **spiffworkflow-backend**: API server running on port 8000
 - **spiffworkflow-frontend**: Web UI running on port 8001
 - **spiffworkflow-connector**: Connector proxy for external integrations on port 8004
+- **match-volume-ownership**: Helper container to set proper file permissions
 
 ## Prerequisites
 
@@ -36,20 +37,26 @@ cp .env.example .env
 # Edit .env to customize ports if needed
 ```
 
-### 2. Start all services
+### 2. Pull Docker images
+
+Pull the images first (recommended):
+```bash
+docker compose pull
+```
+
+This will download:
+- `ghcr.io/sartography/spiffworkflow-backend:latest`
+- `ghcr.io/sartography/spiffworkflow-frontend:latest`
+- `ghcr.io/sartography/connector-proxy-demo:latest`
+- `alpine` (for volume permissions)
+
+### 3. Start all services
 
 ```bash
 docker compose up -d
 ```
 
 **Note**: On older systems, use `docker-compose` (with hyphen) instead of `docker compose`
-
-### 3. Pull images (if needed)
-
-If you get image pull errors, try pulling them explicitly first:
-```bash
-docker compose pull
-```
 
 ### 4. Check service status
 
@@ -181,10 +188,17 @@ BPMN process models are stored in the `./process_models` directory and mounted i
 ## Next Steps
 
 Once SpiffWorkflow is running:
-1. Access the frontend at http://localhost:7001
+1. Access the frontend at http://localhost:8001
 2. Create your first process model
 3. Test the workflow execution
-4. Explore the API at http://localhost:7000/v1.0/ui
+4. Explore the API at http://localhost:8000/v1.0/ui
+
+## Official Documentation
+
+This setup is based on the official SpiffWorkflow configuration:
+- **Repository**: https://github.com/sartography/spiff-arena
+- **Official Tutorial**: https://www.spiffworkflow.org/posts/articles/get_started_docker/
+- **Documentation**: https://spiff-arena.readthedocs.io/
 
 ## Integration with Darb
 

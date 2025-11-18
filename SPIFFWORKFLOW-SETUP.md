@@ -4,120 +4,179 @@ This docker-compose configuration runs a complete SpiffWorkflow environment for 
 
 ## Services Included
 
-- **spiffworkflow-backend**: API server running on port 7000
-- **spiffworkflow-frontend**: Web UI running on port 7001
-- **spiffworkflow-db**: PostgreSQL database on port 5432
-- **spiffworkflow-redis**: Redis cache on port 6379
+- **spiffworkflow-backend**: API server running on port 8000
+- **spiffworkflow-frontend**: Web UI running on port 8001
+- **spiffworkflow-connector**: Connector proxy for external integrations on port 8004
 
 ## Prerequisites
 
-- Docker Engine 20.10+
+- Docker Desktop (Windows/Mac) or Docker Engine (Linux) 20.10+
 - Docker Compose 2.0+
+
+**IMPORTANT**: Make sure Docker Desktop is running before executing any docker commands.
 
 ## Quick Start
 
-### 1. Start all services
+### 0. Ensure Docker is Running
 
+**Windows/Mac**:
+- Open Docker Desktop application
+- Wait for the Docker icon in the system tray to show "Docker Desktop is running"
+
+**Linux**:
 ```bash
-docker-compose up -d
+sudo systemctl status docker
 ```
 
-### 2. Check service status
+### 1. (Optional) Configure ports
 
+Copy the example environment file if you want to customize ports:
 ```bash
-docker-compose ps
+cp .env.example .env
+# Edit .env to customize ports if needed
 ```
 
-### 3. View logs
+### 2. Start all services
+
+```bash
+docker compose up -d
+```
+
+**Note**: On older systems, use `docker-compose` (with hyphen) instead of `docker compose`
+
+### 3. Pull images (if needed)
+
+If you get image pull errors, try pulling them explicitly first:
+```bash
+docker compose pull
+```
+
+### 4. Check service status
+
+```bash
+docker compose ps
+```
+
+### 5. View logs
 
 ```bash
 # All services
-docker-compose logs -f
+docker compose logs -f
 
 # Specific service
-docker-compose logs -f spiffworkflow-backend
-docker-compose logs -f spiffworkflow-frontend
+docker compose logs -f spiffworkflow-backend
+docker compose logs -f spiffworkflow-frontend
 ```
 
-### 4. Access SpiffWorkflow
+### 6. Access SpiffWorkflow
 
-- **Frontend UI**: http://localhost:7001
-- **Backend API**: http://localhost:7000
-- **API Documentation**: http://localhost:7000/v1.0/ui (Swagger)
-- **Health Check**: http://localhost:7000/v1.0/status
+- **Frontend UI**: http://localhost:8001
+- **Backend API**: http://localhost:8000
+- **API Documentation**: http://localhost:8000/v1.0/ui (Swagger)
+- **Health Check**: http://localhost:8000/v1.0/status
+- **Connector Proxy**: http://localhost:8004
 
-### 5. Stop services
+### 7. Stop services
 
 ```bash
-docker-compose down
+docker compose down
 ```
 
-### 6. Stop and remove all data (clean slate)
+### 8. Stop and remove all data (clean slate)
 
 ```bash
-docker-compose down -v
+docker compose down -v
 ```
 
 ## Default Credentials
 
-In local development mode, SpiffWorkflow typically uses:
-- **Username**: admin
-- **Password**: admin
-
-*Note: These credentials may vary based on the SpiffWorkflow version and configuration.*
+SpiffWorkflow in local development mode uses open authentication.
+No login credentials are required for local testing.
 
 ## Troubleshooting
 
-### Services won't start
+### Docker Desktop Not Running
+
+**Error**: `open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified`
+
+**Solution**:
+1. Open Docker Desktop application
+2. Wait for it to fully start (Docker icon in system tray should be green)
+3. Try the docker commands again
+
+### Cannot Pull Images
+
+**Error**: `unable to get image 'ghcr.io/sartography/spiffworkflow-backend:latest'`
+
+**Solutions**:
+
+1. Check your internet connection
+2. Try pulling images explicitly:
+```bash
+docker compose pull
+```
+
+3. If behind a proxy, configure Docker Desktop proxy settings:
+   - Open Docker Desktop → Settings → Resources → Proxies
+
+4. Try pulling a specific image to test:
+```bash
+docker pull ghcr.io/sartography/spiffworkflow-backend:latest
+```
+
+### Services Won't Start
 
 Check if ports are already in use:
 ```bash
-# Check port 7000
-lsof -i :7000
+# Windows (PowerShell)
+netstat -ano | findstr :8000
+netstat -ano | findstr :8001
+netstat -ano | findstr :8004
 
-# Check port 7001
-lsof -i :7001
-
-# Check port 5432
-lsof -i :5432
+# Linux/Mac
+lsof -i :8000
+lsof -i :8001
+lsof -i :8004
 ```
 
-### Backend fails to connect to database
+### Services Keep Restarting
 
-Wait for the database to be fully ready:
+Check the logs for errors:
 ```bash
-docker-compose logs spiffworkflow-db
+docker compose logs spiffworkflow-backend
+docker compose logs spiffworkflow-frontend
+docker compose logs spiffworkflow-connector
 ```
 
-Check the health status:
+### Database Issues
+
+The setup uses SQLite stored in a Docker volume. To reset:
 ```bash
-docker-compose ps
+docker compose down -v
+docker compose up -d
 ```
 
-### View backend logs for errors
+### View Backend Logs for Errors
 
 ```bash
-docker-compose logs spiffworkflow-backend | tail -n 100
+docker compose logs spiffworkflow-backend | tail -n 100
 ```
 
-### Reset everything
+### Reset Everything
 
 ```bash
-docker-compose down -v
-docker-compose up -d
+docker compose down -v
+docker compose up -d
 ```
 
 ## Volumes
 
 Data is persisted in Docker volumes:
-- `spiffworkflow-db-data`: Database files
-- `spiffworkflow-redis-data`: Redis cache
-- `spiffworkflow-process-models`: BPMN process models
-- `spiffworkflow-backend-logs`: Application logs
+- `spiffworkflow_backend_db`: SQLite database file
 
-## Network
+## Process Models
 
-All services are connected via the `spiffworkflow-network` bridge network, allowing them to communicate using service names.
+BPMN process models are stored in the `./process_models` directory and mounted into the backend container.
 
 ## Next Steps
 

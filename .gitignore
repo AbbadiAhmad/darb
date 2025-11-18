@@ -205,3 +205,11 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Docker
+docker-compose.override.yml
+.dockerignore
+
+# SpiffWorkflow
+process_models/*
+!process_models/README.md
